@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Guff — stock advice that actually makes sense</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F7F9F1;
+    --bg-panel: #FFFFFF;
+    --ink: #17261D;
+    --ink-soft: #4B5C4F;
+    --green-deep: #2F6844;
+    --green-mid: #4C8C63;
+    --green-pale: #DCEEDD;
+    --yellow: #FFC24B;
+    --yellow-deep: #E8A722;
+    --coral: #FF6F59;
+    --coral-pale: #FFE4DE;
+    --line: #E2E8DC;
+    --shadow-card: 0 10px 24px rgba(23, 38, 29, 0.08);
+    --radius-lg: 28px;
+    --radius-md: 18px;
+    --radius-sm: 10px;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  :root:not([data-theme="light"]) {
+    @media (prefers-color-scheme: dark) {
+      --bg: #10160F;
+      --bg-panel: #17201A;
+      --ink: #EAF2E9;
+      --ink-soft: #AEC0AF;
+      --green-deep: #6FBF8B;
+      --green-mid: #4C8C63;
+      --green-pale: #1E3323;
+      --yellow: #FFC24B;
+      --yellow-deep: #FFD375;
+      --coral: #FF8672;
+      --coral-pale: #3A2521;
+      --line: #26312A;
+      --shadow-card: 0 10px 24px rgba(0, 0, 0, 0.35);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #10160F;
+    --bg-panel: #17201A;
+    --ink: #EAF2E9;
+    --ink-soft: #AEC0AF;
+    --green-deep: #6FBF8B;
+    --green-mid: #4C8C63;
+    --green-pale: #1E3323;
+    --yellow: #FFC24B;
+    --yellow-deep: #FFD375;
+    --coral: #FF8672;
+    --coral-pale: #3A2521;
+    --line: #26312A;
+    --shadow-card: 0 10px 24px rgba(0, 0, 0, 0.35);
+  }
+  html { scroll-padding-top: env(safe-area-inset-top, 0px); scroll-behavior: smooth; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Inter', sans-serif;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1, h2, h3, .brand { font-family: 'Baloo 2', sans-serif; color: var(--ink); }
+  img, svg { max-width: 100%; }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+
+  /* Nav */
+  header {
+    position: sticky; top: 0; z-index: 20;
+    padding-top: env(safe-area-inset-top, 0px);
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--line);
+  }
+  nav.wrap { display: flex; align-items: center; justify-content: space-between; height: 72px; }
+  .brand { font-weight: 700; font-size: 1.5rem; display: flex; align-items: center; gap: 8px; text-decoration: none; color: var(--ink); }
+  .brand svg { width: 30px; height: 30px; }
+  .navlinks { display: flex; align-items: center; gap: 28px; }
+  .navlinks a { color: var(--ink-soft); text-decoration: none; font-weight: 500; font-size: 0.95rem; }
+  .navlinks a:hover { color: var(--green-deep); }
+  .navlinks a.btn-primary { color: #fff; }
+  .navlinks a.btn-primary:hover { color: #fff; }
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 12px 22px; border-radius: 999px; font-family: 'Inter', sans-serif;
+    font-weight: 600; font-size: 0.95rem; border: none; cursor: pointer;
+    text-decoration: none; transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  .btn:focus-visible { outline: 3px solid var(--green-mid); outline-offset: 2px; }
+  .btn-primary { background: var(--green-deep); color: #fff; }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 8px 18px rgba(47,104,68,0.28); }
+  .btn-primary:disabled { opacity: 0.6; cursor: default; transform: none; box-shadow: none; }
+  .btn-ghost { background: transparent; color: var(--green-deep); border: 1.5px solid var(--green-deep); }
+  .navlinks .btn { padding: 10px 18px; }
+
+  /* Hero */
+  .hero { padding: 96px 0 64px; }
+  .hero-copy { max-width: 620px; }
+  .eyebrow-plain { color: var(--green-mid); font-weight: 600; font-size: 0.95rem; margin: 0 0 14px; }
+  .hero h1 { font-size: clamp(2.4rem, 5vw, 3.6rem); line-height: 1.1; margin: 0 0 20px; font-weight: 700; max-width: 16ch; }
+  .hero p.lede { font-size: 1.2rem; color: var(--ink-soft); max-width: 46ch; margin: 0 0 32px; }
+  .hero-ctas { display: flex; gap: 14px; flex-wrap: wrap; }
+
+  /* How it works */
+  .section { padding: 64px 0; }
+  .section-head { max-width: 46ch; margin: 0 0 40px; }
+  .section-head h2 { font-size: clamp(1.6rem, 3vw, 2.1rem); margin: 0 0 12px; font-weight: 700; }
+  .section-head p { color: var(--ink-soft); margin: 0; font-size: 1.05rem; }
+
+  /* Calculator */
+  .calc-box {
+    background: var(--bg-panel); border: 1px solid var(--line); border-radius: var(--radius-lg);
+    padding: 32px; box-shadow: var(--shadow-card); max-width: 720px;
+  }
+  .calc-inputs { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; margin-bottom: 20px; }
+  .calc-inputs label { display: flex; flex-direction: column; gap: 6px; font-weight: 600; font-size: 0.9rem; color: var(--ink-soft); }
+  .calc-inputs input {
+    font-family: 'Inter', sans-serif; font-size: 1rem; color: var(--ink); padding: 10px 14px;
+    border: 1.5px solid var(--line); border-radius: var(--radius-sm); background: var(--bg);
+  }
+  .calc-inputs input:focus-visible { outline: 3px solid var(--green-mid); outline-offset: 1px; }
+  .calc-results { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 24px 0 16px; }
+  .calc-stat {
+    background: var(--green-pale); border-radius: var(--radius-md); padding: 18px 14px;
+    display: flex; flex-direction: column; gap: 4px; text-align: center;
+  }
+  .calc-stat-value { font-family: 'Baloo 2', sans-serif; font-weight: 700; font-size: 1.4rem; color: var(--green-deep); }
+  .calc-stat-label { font-size: 0.82rem; color: var(--ink-soft); font-weight: 500; }
+  .calc-disclaimer { font-size: 0.85rem; color: var(--ink-soft); margin: 0; }
+  @media (max-width: 560px) {
+    .calc-inputs { grid-template-columns: 1fr; }
+    .calc-results { grid-template-columns: 1fr; }
+  }
+  .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+  .step { background: var(--bg-panel); border: 1px solid var(--line); border-radius: var(--radius-md); padding: 28px; }
+  .step-num {
+    width: 38px; height: 38px; border-radius: 50%; background: var(--green-pale); color: var(--green-deep);
+    display: flex; align-items: center; justify-content: center; font-family: 'Baloo 2', sans-serif;
+    font-weight: 700; margin-bottom: 16px; font-size: 1.05rem;
+  }
+  .step h3 { font-size: 1.15rem; margin: 0 0 8px; }
+  .step p { color: var(--ink-soft); margin: 0; font-size: 0.98rem; }
+
+  /* Insights */
+  .insights-section { background: var(--green-pale); border-radius: var(--radius-lg); margin: 0 24px; padding: 56px 40px; }
+  .insights-section .section-head { max-width: 52ch; }
+  .insight-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+  .insight-card {
+    background: var(--bg-panel); border-radius: var(--radius-md); padding: 24px;
+    box-shadow: var(--shadow-card);
+  }
+  .insight-tag {
+    display: inline-block; font-size: 0.78rem; font-weight: 600; color: var(--green-deep);
+    background: var(--green-pale); padding: 4px 12px; border-radius: 999px; margin-bottom: 14px;
+  }
+  .insight-card h3 { font-size: 1.05rem; margin: 0 0 10px; font-weight: 600; }
+  .insight-card p { color: var(--ink-soft); font-size: 0.95rem; margin: 0; }
+
+  /* Ask tool */
+  .ask-section .wrap { max-width: 780px; }
+  .ask-box {
+    background: var(--bg-panel); border: 1px solid var(--line); border-radius: var(--radius-lg);
+    padding: 32px; box-shadow: var(--shadow-card);
+  }
+  .ask-box textarea {
+    width: 100%; min-height: 92px; border-radius: var(--radius-sm); border: 1.5px solid var(--line);
+    padding: 14px 16px; font-family: 'Inter', sans-serif; font-size: 1rem; color: var(--ink);
+    background: var(--bg); resize: vertical;
+  }
+  .ask-box textarea:focus-visible { outline: 3px solid var(--green-mid); outline-offset: 1px; }
+  .ask-row { display: flex; justify-content: space-between; align-items: center; margin-top: 14px; gap: 12px; flex-wrap: wrap; }
+  .example-chips { display: flex; gap: 8px; flex-wrap: wrap; }
+  .chip-btn {
+    background: var(--green-pale); color: var(--green-deep); border: none; border-radius: 999px;
+    padding: 7px 14px; font-size: 0.85rem; font-weight: 500; cursor: pointer; font-family: 'Inter', sans-serif;
+  }
+  .chip-btn:hover { background: var(--yellow); color: var(--ink); }
+  .answer {
+    margin-top: 22px; padding-top: 22px; border-top: 1px dashed var(--line);
+    display: none; white-space: pre-wrap; font-size: 1rem; color: var(--ink);
+  }
+  .answer.visible { display: block; }
+  .answer-label { font-weight: 700; color: var(--green-deep); margin-bottom: 8px; display: block; font-family: 'Baloo 2', sans-serif; }
+  .loading-dots::after { content: 'Guff is thinking'; color: var(--ink-soft); font-style: italic; }
+  .fallback-note { display: none; margin-top: 18px; padding: 14px 16px; background: var(--coral-pale); border-radius: var(--radius-sm); color: var(--ink); font-size: 0.92rem; }
+  .fallback-note.visible { display: block; }
+
+  /* Disclaimer + footer */
+  .disclaimer {
+    margin: 8px 24px 0; background: var(--bg-panel); border: 1px solid var(--line);
+    border-radius: var(--radius-md); padding: 22px 26px; font-size: 0.9rem; color: var(--ink-soft);
+  }
+  .disclaimer strong { color: var(--ink); }
+  footer { padding: 40px 24px 48px; text-align: center; color: var(--ink-soft); font-size: 0.88rem; }
+  footer .brand { justify-content: center; margin-bottom: 10px; font-size: 1.15rem; }
+
+  @media (max-width: 860px) {
+    .steps { grid-template-columns: 1fr; }
+    .insight-grid { grid-template-columns: 1fr; }
+    .insights-section { padding: 40px 22px; margin: 0 12px; }
+    .navlinks a.hide-mobile { display: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; scroll-behavior: auto !important; }
+  }
+
+  /* Side directory toolbar */
+  .side-toolbar {
+    position: fixed; left: 22px; top: 50%; transform: translateY(-50%);
+    display: flex; flex-direction: column; gap: 20px; z-index: 15;
+  }
+  .side-toolbar a {
+    display: flex; align-items: center; gap: 10px; text-decoration: none; padding: 2px 0;
+  }
+  .side-toolbar .dot {
+    width: 10px; height: 10px; border-radius: 50%; background: var(--bg-panel);
+    border: 2px solid var(--ink-soft); opacity: 0.5; flex-shrink: 0; transition: all 0.2s ease;
+  }
+  .side-toolbar a:hover .dot { opacity: 1; border-color: var(--green-mid); }
+  .side-toolbar a.active .dot { background: var(--green-deep); border-color: var(--green-deep); opacity: 1; }
+  .side-toolbar .label {
+    opacity: 0; transform: translateX(-6px); transition: opacity 0.2s ease, transform 0.2s ease;
+    white-space: nowrap; background: var(--bg-panel); color: var(--ink); font-size: 0.82rem; font-weight: 600;
+    padding: 5px 12px; border-radius: 999px; box-shadow: var(--shadow-card); border: 1px solid var(--line);
+    pointer-events: none;
+  }
+  .side-toolbar a:hover .label, .side-toolbar a.active .label { opacity: 1; transform: translateX(0); }
+  @media (max-width: 1300px) {
+    .side-toolbar { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <nav class="wrap">
+    <a href="#top" class="brand">
+      <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M16 29V17" stroke="var(--green-deep)" stroke-width="2.5" stroke-linecap="round"/>
+        <path d="M16 17C16 17 6 17 6 8C15 8 16 17 16 17Z" fill="var(--green-mid)"/>
+        <path d="M16 12C16 12 25 12 25 4C17 4 16 12 16 12Z" fill="var(--green-deep)"/>
+      </svg>
+      Guff
+    </a>
+    <div class="navlinks">
+      <a href="#how" class="hide-mobile">How it works</a>
+      <a href="#calculator" class="hide-mobile">Calculator</a>
+      <a href="#insights" class="hide-mobile">Insights</a>
+      <a href="#ask" class="btn btn-primary">Ask Guff</a>
+    </div>
+  </nav>
+</header>
+
+<nav class="side-toolbar" aria-label="Page sections">
+  <a href="#how" data-section="how"><span class="dot"></span><span class="label">How it works</span></a>
+  <a href="#calculator" data-section="calculator"><span class="dot"></span><span class="label">Calculator</span></a>
+  <a href="#insights" data-section="insights"><span class="dot"></span><span class="label">Insights</span></a>
+  <a href="#ask" data-section="ask"><span class="dot"></span><span class="label">Ask Guff</span></a>
+</nav>
+
+<main id="top">
+
+  <section class="hero">
+    <div class="wrap">
+      <div class="hero-copy">
+        <p class="eyebrow-plain">An AI that talks about money like a person, not a terminal</p>
+        <h1>Stock advice that actually makes sense.</h1>
+        <p class="lede">Guff explains the market in plain English. Ask it anything about a stock, a strategy, or a term you keep hearing — no finance degree required.</p>
+        <div class="hero-ctas">
+          <a href="#ask" class="btn btn-primary">Ask Guff something</a>
+          <a href="#insights" class="btn btn-ghost">See example answers</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="how">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>How Guff works</h2>
+        <p>No accounts, no charts to decode. Just a conversation about money that meets you where you are.</p>
+      </div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <h3>Ask a question</h3>
+          <p>Type anything — a ticker, a strategy, or something you overheard and didn't understand. There's no wrong way to ask.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <h3>Get a plain-English answer</h3>
+          <p>Guff breaks down what's actually going on and what's worth thinking about — without the jargon or the hype.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <h3>Learn as you go</h3>
+          <p>Every answer is a small lesson, so the next question you ask is a little sharper than the last.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="calculator">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>See what compounding could do</h2>
+        <p>A quick, rough estimate — not a prediction, just a way to see how consistency and time add up.</p>
+      </div>
+      <div class="calc-box">
+        <div class="calc-inputs">
+          <label>Starting amount
+            <input type="number" id="calc-start" value="1000" min="0">
+          </label>
+          <label>Monthly contribution
+            <input type="number" id="calc-monthly" value="100" min="0">
+          </label>
+          <label>Estimated annual return (%)
+            <input type="number" id="calc-rate" value="7" min="0" step="0.1">
+          </label>
+          <label>Years
+            <input type="number" id="calc-years" value="20" min="1" max="60">
+          </label>
+        </div>
+        <button class="btn btn-primary" id="calc-btn" type="button">Calculate</button>
+        <div class="calc-results" id="calc-results">
+          <div class="calc-stat">
+            <span class="calc-stat-value" id="calc-total">$0</span>
+            <span class="calc-stat-label">Ending balance</span>
+          </div>
+          <div class="calc-stat">
+            <span class="calc-stat-value" id="calc-contributed">$0</span>
+            <span class="calc-stat-label">You'll have contributed</span>
+          </div>
+          <div class="calc-stat">
+            <span class="calc-stat-value" id="calc-growth">$0</span>
+            <span class="calc-stat-label">Growth from compounding</span>
+          </div>
+        </div>
+        <p class="calc-disclaimer">This assumes a steady annual return, which real markets never actually deliver — some years will be higher, some lower, some negative. It's for illustration only, not a forecast or a promise.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="insights">
+    <div class="wrap">
+      <div class="insights-section">
+        <div class="section-head">
+          <h2>What people ask Guff</h2>
+          <p>A few example conversations, so you know what to expect. These are sample answers, not live data.</p>
+        </div>
+        <div class="insight-grid">
+          <div class="insight-card">
+            <span class="insight-tag">Beginner question</span>
+            <h3>"Is it too late to start investing at 35?"</h3>
+            <p>Not even close. Guff would walk through why time in the market usually matters more than timing the market, and what a first small step could look like.</p>
+          </div>
+          <div class="insight-card">
+            <span class="insight-tag">Understanding a stock</span>
+            <h3>"Why do people talk about Nvidia so much?"</h3>
+            <p>Guff would explain the company's role in AI chips, why growth stocks swing harder than others, and what questions to ask before following the hype.</p>
+          </div>
+          <div class="insight-card">
+            <span class="insight-tag">Strategy</span>
+            <h3>"What's the difference between growth and value investing?"</h3>
+            <p>A plain-language comparison — what each style bets on, the trade-offs, and how most beginner portfolios end up blending a bit of both.</p>
+          </div>
+          <div class="insight-card">
+            <span class="insight-tag">Risk check</span>
+            <h3>"Should I put my whole savings into one stock?"</h3>
+            <p>Guff would gently walk through diversification and why concentrating everything in one company is one of the most common early mistakes.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section ask-section" id="ask">
+    <div class="wrap">
+      <div class="section-head">
+        <h2>Try it yourself</h2>
+        <p>Ask Guff a real question below. It's live — a real answer, written just for you.</p>
+      </div>
+      <div class="ask-box">
+        <label for="question" style="font-weight:600; display:block; margin-bottom:10px;">What's on your mind?</label>
+        <textarea id="question" placeholder="e.g. Is Apple stock a good buy for a beginner?"></textarea>
+        <div class="ask-row">
+          <div class="example-chips">
+            <button class="chip-btn" type="button" data-q="What should I know before buying my first stock?">First stock tips</button>
+            <button class="chip-btn" type="button" data-q="What's the difference between a stock and an ETF?">Stock vs ETF</button>
+            <button class="chip-btn" type="button" data-q="How do I know if a stock is overpriced?">Is it overpriced?</button>
+          </div>
+          <button class="btn btn-primary" id="ask-btn" type="button">Ask Guff</button>
+        </div>
+        <div class="answer" id="answer">
+          <span class="answer-label">Guff says</span>
+          <div id="answer-text"></div>
+        </div>
+        <div class="fallback-note" id="fallback-note">
+          Guff's live AI isn't available in this view right now. This demo works fully when opened in Claude, where the "ask" feature is connected.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="disclaimer">
+    <strong>Guff is an educational tool, not financial advice.</strong> It's an AI, not a licensed financial advisor, broker, or accountant, and it doesn't have access to live prices or your personal financial situation. Nothing here is a recommendation to buy or sell anything. Always do your own research and talk to a qualified professional before making investment decisions.
+  </div>
+
+</main>
+
+<footer>
+  <div class="brand" style="justify-content:center;">
+    <svg viewBox="0 0 32 32" fill="none" width="22" height="22" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <path d="M16 29V17" stroke="var(--green-deep)" stroke-width="2.5" stroke-linecap="round"/>
+      <path d="M16 17C16 17 6 17 6 8C15 8 16 17 16 17Z" fill="var(--green-mid)"/>
+      <path d="M16 12C16 12 25 12 25 4C17 4 16 12 16 12Z" fill="var(--green-deep)"/>
+    </svg>
+    Guff
+  </div>
+  Built with AI, for people who are new to investing.
+</footer>
+
+<script>
+(function() {
+  const askBtn = document.getElementById('ask-btn');
+  const textarea = document.getElementById('question');
+  const answerBox = document.getElementById('answer');
+  const answerText = document.getElementById('answer-text');
+  const fallbackNote = document.getElementById('fallback-note');
+  const chips = document.querySelectorAll('.chip-btn');
+
+  chips.forEach(chip => {
+    chip.addEventListener('click', () => {
+      textarea.value = chip.getAttribute('data-q');
+      textarea.focus();
+    });
+  });
+
+  async function ask() {
+    const q = textarea.value.trim();
+    if (!q) {
+      textarea.focus();
+      return;
+    }
+    askBtn.disabled = true;
+    askBtn.textContent = 'Thinking…';
+    fallbackNote.classList.remove('visible');
+    answerBox.classList.add('visible');
+    answerText.innerHTML = '<span class="loading-dots"></span>';
+
+    try {
+      const res = await fetch('/api/ask', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question: q })
+      });
+
+      if (!res.ok) {
+        if (res.status === 429) {
+          answerText.textContent = "Guff is a little overwhelmed right now — give it a moment and try again.";
+        } else {
+          throw new Error('Request failed: ' + res.status);
+        }
+        return;
+      }
+
+      const data = await res.json();
+      answerText.textContent = data.answer;
+    } catch (err) {
+      answerBox.classList.remove('visible');
+      fallbackNote.textContent = "Guff couldn't reach its brain just now. Check that the site's backend is running, then try again.";
+      fallbackNote.classList.add('visible');
+    } finally {
+      askBtn.disabled = false;
+      askBtn.textContent = 'Ask Guff';
+    }
+  }
+
+  askBtn.addEventListener('click', ask);
+  textarea.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) ask();
+  });
+
+  // Compound interest calculator
+  const calcBtn = document.getElementById('calc-btn');
+  const calcStart = document.getElementById('calc-start');
+  const calcMonthly = document.getElementById('calc-monthly');
+  const calcRate = document.getElementById('calc-rate');
+  const calcYears = document.getElementById('calc-years');
+  const calcTotal = document.getElementById('calc-total');
+  const calcContributed = document.getElementById('calc-contributed');
+  const calcGrowth = document.getElementById('calc-growth');
+
+  function formatMoney(n) {
+    return n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+  }
+
+  function runCalculator() {
+    const start = Math.max(0, parseFloat(calcStart.value) || 0);
+    const monthly = Math.max(0, parseFloat(calcMonthly.value) || 0);
+    const annualRate = Math.max(0, parseFloat(calcRate.value) || 0) / 100;
+    const years = Math.max(1, Math.min(60, parseFloat(calcYears.value) || 1));
+
+    const monthlyRate = annualRate / 12;
+    const months = years * 12;
+
+    // Future value of the starting lump sum
+    const fvStart = start * Math.pow(1 + monthlyRate, months);
+
+    // Future value of an ordinary annuity of monthly contributions
+    let fvContributions;
+    if (monthlyRate === 0) {
+      fvContributions = monthly * months;
+    } else {
+      fvContributions = monthly * ((Math.pow(1 + monthlyRate, months) - 1) / monthlyRate);
+    }
+
+    const total = fvStart + fvContributions;
+    const contributed = start + monthly * months;
+    const growth = total - contributed;
+
+    calcTotal.textContent = formatMoney(total);
+    calcContributed.textContent = formatMoney(contributed);
+    calcGrowth.textContent = formatMoney(Math.max(0, growth));
+  }
+
+  calcBtn.addEventListener('click', runCalculator);
+  [calcStart, calcMonthly, calcRate, calcYears].forEach((el) => {
+    el.addEventListener('keydown', (e) => { if (e.key === 'Enter') runCalculator(); });
+  });
+  runCalculator(); // show a result immediately with the default values
+
+  // Side toolbar scrollspy
+  const toolbarLinks = document.querySelectorAll('.side-toolbar a');
+  const spySections = Array.from(toolbarLinks)
+    .map((link) => document.getElementById(link.dataset.section))
+    .filter(Boolean);
+
+  if (spySections.length && toolbarLinks.length) {
+    const spyObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            toolbarLinks.forEach((link) => {
+              link.classList.toggle('active', link.dataset.section === entry.target.id);
+            });
+          }
+        });
+      },
+      { rootMargin: '-40% 0px -50% 0px', threshold: 0 }
+    );
+    spySections.forEach((section) => spyObserver.observe(section));
+  }
+})();
+</script>
+
+</body>
+</html>
