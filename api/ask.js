@@ -84,10 +84,14 @@ async function detectAssets(question) {
       ],
       { maxTokens: 40, temperature: 0 }
     );
-    if (!res.ok) return [];
+    if (!res.ok) {
+      console.log('DEBUG: asset extraction Groq call failed with status', res.status);
+      return [];
+    }
 
     const data = await res.json();
     const raw = data.choices?.[0]?.message?.content?.trim().toUpperCase() || 'NONE';
+    console.log('DEBUG: raw asset extraction response:', JSON.stringify(raw));
     if (raw === 'NONE') return [];
 
     const assets = raw.split(',').map(s => s.trim()).map(entry => {
