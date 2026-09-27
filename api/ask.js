@@ -107,7 +107,11 @@ async function detectAssets(question) {
 
 async function getStockQuote(ticker, label) {
   const key = process.env.FINNHUB_API_KEY;
-  if (!key) return null;
+  if (!key) {
+    console.log('DEBUG: FINNHUB_API_KEY is missing at runtime');
+    return null;
+  }
+  console.log('DEBUG: calling Finnhub for ticker', ticker);
 
   try {
     const [quoteRes, profileRes] = await Promise.all([
@@ -117,6 +121,7 @@ async function getStockQuote(ticker, label) {
     if (!quoteRes.ok) return null;
 
     const quote = await quoteRes.json();
+    console.log('DEBUG: Finnhub quote response', JSON.stringify(quote));
     if (!quote || quote.c === 0) return null;
 
     const profile = profileRes.ok ? await profileRes.json() : {};
@@ -225,6 +230,7 @@ export default async function handler(req, res) {
 
   let userContent = question;
   const assets = await detectAssets(question);
+  console.log('DEBUG: detected assets', JSON.stringify(assets));
   if (assets.length > 0) {
     const quotes = (await Promise.all(assets.map(getQuoteForAsset))).filter(Boolean);
     if (quotes.length > 0) {
