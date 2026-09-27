@@ -28,16 +28,25 @@ Rules for every answer:
 - End with one short, genuinely encouraging or clarifying sentence, not a generic disclaimer (the page already shows a disclaimer).
 - If the question is not about money, investing, or markets, gently redirect back to what Guff can help with.`;
 
-const ASSET_EXTRACTION_PROMPT = `You identify financial assets named in a user's question. Look for stocks (by company name or ticker), stock market indices (like the S&P 500, Nasdaq, Dow Jones, Russell 2000), and cryptocurrencies (by name or symbol).
+const ASSET_EXTRACTION_PROMPT = `You identify financial assets named in a user's question. Look for stocks (by company name OR ticker symbol), stock market indices (like the S&P 500, Nasdaq, Dow Jones, Russell 2000), and cryptocurrencies (by name or symbol). A company name alone (no ticker, no word "stock") still counts — e.g. "chipotle" means the company Chipotle Mexican Grill, ticker CMG.
 
 Reply with a comma-separated list of up to 3 assets, each in the exact format TYPE:SYMBOL, where TYPE is one of STOCK, INDEX, or CRYPTO, and SYMBOL is:
 - for STOCK: the ticker symbol (e.g. AAPL)
 - for INDEX: one of SPX (S&P 500), IXIC (Nasdaq), DJI (Dow Jones), or RUT (Russell 2000)
 - for CRYPTO: the common ticker (e.g. BTC, ETH, SOL, DOGE, XRP, ADA, BNB, MATIC, LTC, AVAX, DOT, LINK, SHIB, TRX)
 
-Example replies: "STOCK:AAPL" or "STOCK:AAPL,STOCK:MSFT" or "CRYPTO:BTC" or "INDEX:SPX,CRYPTO:ETH"
+Examples:
+"What is chipotle trading at?" -> STOCK:CMG
+"Is Tesla a good buy?" -> STOCK:TSLA
+"Should I get Apple or Microsoft stock?" -> STOCK:AAPL,STOCK:MSFT
+"How's the S&P 500 doing today?" -> INDEX:SPX
+"What's Bitcoin worth right now?" -> CRYPTO:BTC
+"Compare Bitcoin and Ethereum" -> CRYPTO:BTC,CRYPTO:ETH
+"Should I diversify my portfolio?" -> NONE
+"What's a P/E ratio?" -> NONE
+"Is it too late to start investing at 40?" -> NONE
 
-If no specific asset is named, reply with exactly: NONE
+If no specific company, index, or crypto asset is named, reply with exactly: NONE
 Reply with ONLY the list or NONE. No explanation, no other text.`;
 
 // Index symbols are tracked via a well-known ETF as a close, freely available stand-in
