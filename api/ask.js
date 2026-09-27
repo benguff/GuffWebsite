@@ -64,7 +64,7 @@ const CRYPTO_IDS = {
   AVAX: 'avalanche-2', DOT: 'polkadot', LINK: 'chainlink', SHIB: 'shiba-inu', TRX: 'tron'
 };
 
-async function callGroq(messages, { maxTokens = 500, temperature = 0.6 } = {}) {
+async function callGroq(messages, { maxTokens = 500, temperature = 0.6, reasoningEffort = 'low' } = {}) {
   return fetch('https://api.groq.com/openai/v1/chat/completions', {
     method: 'POST',
     headers: {
@@ -75,7 +75,9 @@ async function callGroq(messages, { maxTokens = 500, temperature = 0.6 } = {}) {
       model: 'openai/gpt-oss-120b',
       messages,
       max_tokens: maxTokens,
-      temperature
+      temperature,
+      reasoning_effort: reasoningEffort, // keep the reasoning model's thinking short
+      reasoning_format: 'hidden' // return only the final answer, not the thinking trace
     })
   });
 }
@@ -91,16 +93,12 @@ async function detectAssets(question) {
         { role: 'system', content: ASSET_EXTRACTION_PROMPT },
         { role: 'user', content: question }
       ],
-      { maxTokens: 40, temperature: 0 }
+      { maxTokens: 60, temperature: 0, reasoningEffort: 'low' }
     );
-    if (!res.ok) {
-      console.log('DEBUG: asset extraction Groq call failed with status', res.status);
-      return [];
-    }
+    if (!res.ok) return [];
 
     const data = await res.json();
     const raw = data.choices?.[0]?.message?.content?.trim().toUpperCase() || 'NONE';
-    console.log('DEBUG: raw asset extraction response:', JSON.stringify(raw));
     if (raw === 'NONE') return [];
 
     const assets = raw.split(',').map(s => s.trim()).map(entry => {
@@ -120,11 +118,7 @@ async function detectAssets(question) {
 
 async function getStockQuote(ticker, label) {
   const key = process.env.FINNHUB_API_KEY;
-  if (!key) {
-    console.log('DEBUG: FINNHUB_API_KEY is missing at runtime');
-    return null;
-  }
-  console.log('DEBUG: calling Finnhub for ticker', ticker);
+  if (!key) return null;
 
   try {
     const [quoteRes, profileRes] = await Promise.all([
@@ -134,7 +128,6 @@ async function getStockQuote(ticker, label) {
     if (!quoteRes.ok) return null;
 
     const quote = await quoteRes.json();
-    console.log('DEBUG: Finnhub quote response', JSON.stringify(quote));
     if (!quote || quote.c === 0) return null;
 
     const profile = profileRes.ok ? await profileRes.json() : {};
@@ -243,7 +236,6 @@ export default async function handler(req, res) {
 
   let userContent = question;
   const assets = await detectAssets(question);
-  console.log('DEBUG: detected assets', JSON.stringify(assets));
   if (assets.length > 0) {
     const quotes = (await Promise.all(assets.map(getQuoteForAsset))).filter(Boolean);
     if (quotes.length > 0) {
