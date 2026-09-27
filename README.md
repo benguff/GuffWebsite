@@ -35,7 +35,7 @@ open-source model (via Groq's free API tier) instead of a per-user Claude accoun
    - Payments: create a Stripe account, set up a Payment Link or Checkout,
      and gate any premium feature behind it in `api/ask.js`.
 
-## Notes
+## Notes 
 - The rate limiter in `api/ask.js` is basic (resets on redeploy) — fine to
   start, worth upgrading to something like Upstash Redis if traffic grows.
 - Groq's free tier has rate limits; if you outgrow it, either upgrade your
